@@ -70,45 +70,39 @@ app.post("/register", async (request, response)=>{
     } 
 });
 
-app.post("/login", async (request, response)=>{
-    const body = request.body;
-
-    if(!body.email){
-        return response.status(400).json({message:"O email é obrigatório"})
+app.post("/login", async (request, response) => {
+  const body = request.body;
+  console.log(body.email);
+  try {
+    if (!body.email || !body.password) {
+      return response
+        .status(400)
+        .json({ message: "E-mail e/ou senha são obrigatório(s)" });
     }
-    if(!body.password){
-        return response.status(400).json({message:"A senha é obrigatória"})
+
+    const userExists = await userSchema.findOne({ email: body.email });
+
+    if (!userExists) {
+      return response.status(404).json({ message: "E-mail não encontrado" });
     }
 
-    try{    
-        app.post("/login", async (request, response)=>{
-            const body = request.body;
+    const isCorrectPassword = bcrypt.compareSync(
+      body.password,
+      userExists.password
+    );
 
-            if(!body.email){
-                return response.status(400).json({message:"O email é obrigatório"})
-            }
-            if(!body.password){
-                return response.status(400).json({message:"A senha é obrigatória"})
-            }
+    if (!isCorrectPassword) {
+      return response.status(400).json({ message: "Senha inválida" });
+    }
 
-            const userExists = await userSchema.findOne({email:body.email});
-
-            if(!userExists){
-                return response.status(404).json({message:"Email não encontrado!"})
-            }
-
-            const isCorrectPassword = bcrypt.compareSync(body.password, userExists.password);
-
-            if(!isCorrectPassword){
-                return response.status(400).json({message:"Senha incorreta!"})
-            }
-
-            return response.status(200).json({usuario: userExists.name, email: userExists.email, token: TOKEN});
-        });
-    }catch (error) {
-        return response.status(500).json({
-            message:"Erro interno:",
-            error:error 
-        });
-    } 
+    return response.status(200).json({
+      usuario: userExists.name,
+      email: userExists.email,
+      token: TOKEN,
+    });
+  } catch (error) {
+    return response.status(500).json({
+      message: "Erro interno: " + error,
+    });
+  }
 });
