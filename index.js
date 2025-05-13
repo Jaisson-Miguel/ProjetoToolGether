@@ -2,8 +2,9 @@ import express, { request, response } from "express";
 import mongoose from "mongoose";   
 import bcrypt from "bcrypt";
 import userSchema from "./Schemas/User.js";
+import "dotenv/config";
 
-mongoose.connect("mongodb+srv://admin:admin@cluster0.teu70jp.mongodb.net/");
+mongoose.connect(process.env.URL_DATABASE);
 
 const app = express();
 const TOKEN = "71f09f3e-2db7-46c6-97be-d572df7f9116";
