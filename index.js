@@ -1,13 +1,15 @@
-import express, { request, response } from "express";
-import mongoose from "mongoose";   
 import bcrypt from "bcrypt";
-import userSchema from "./Schemas/User.js";
 import "dotenv/config";
+import express from "express";
+import mongoose from "mongoose";
+import userSchema from "./Schemas/User.js";
+
+import jwt from "jsonwebtoken"
 
 mongoose.connect(process.env.URL_DATABASE);
 
 const app = express();
-const TOKEN = "71f09f3e-2db7-46c6-97be-d572df7f9116";
+const SECRET_KEY = "71f09f3e-2db7-46c6-97be-d572df7f9116";
 app.use(express.json());
 
 app.get("/", (request, response) => {
@@ -96,10 +98,12 @@ app.post("/login", async (request, response) => {
       return response.status(400).json({ message: "Senha inválida" });
     }
 
+    const USER_TOKEN = jwt.sign({ id: userExists._id, name:userExists.name }, SECRET_KEY);
+
     return response.status(200).json({
       usuario: userExists.name,
       email: userExists.email,
-      token: TOKEN,
+      token: USER_TOKEN,
     });
   } catch (error) {
     return response.status(500).json({
