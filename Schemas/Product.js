@@ -18,9 +18,8 @@ const productModel = new Schema({
     required: true,
   },
   manufacturer: {
-    type: Schema.Types.ObjectId,
+    type: String,
     required: true,
-    ref: "Manufacturer",
   },
 });
 
