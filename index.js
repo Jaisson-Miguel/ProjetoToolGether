@@ -15,11 +15,11 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 const startApp = async () => {
   const conectado = await conn();
-  
-  if (conectado) {
-    console.log('🟢 Servidor pode ser iniciado.');
 
-    const app = express(); 
+  if (conectado) {
+    console.log("🟢 Servidor pode ser iniciado.");
+
+    const app = express();
 
     app.use(express.json());
 
@@ -32,83 +32,86 @@ const startApp = async () => {
     });
 
     app.post("/register", async (request, response) => {
-    const body = request.body;
+      const body = request.body;
 
-    // Verificando os campos obrigatórios
-    if (!body.email) {
-      return response.status(400).json({ message: "O email é obrigatório" });
-    }
-    if (!body.name) {
-      return response.status(400).json({ message: "O nome é obrigatório" });
-    }
-    if (!body.password) {
-      return response.status(400).json({ message: "A senha é obrigatória" });
-    }
-    if (!body.adress) {
-      return response.status(400).json({ message: "O endereço é obrigatório" });
-    }
-    if (!body.phoneNumber) {
-      return response.status(400).json({ message: "O telefone é obrigatório" });
-    }
-
-    try {
-      // Verificando se o e-mail já existe
-      const emailExist = await userSchema.findOne({ email: body.email });
-      if (emailExist) {
-        return response.status(400).json({ message: "Esse email já está em uso" });
+      if (!body.email) {
+        return response.status(400).json({ message: "O email é obrigatório" });
+      }
+      if (!body.name) {
+        return response.status(400).json({ message: "O nome é obrigatório" });
+      }
+      if (!body.password) {
+        return response.status(400).json({ message: "A senha é obrigatória" });
+      }
+      if (!body.adress) {
+        return response
+          .status(400)
+          .json({ message: "O endereço é obrigatório" });
+      }
+      if (!body.phoneNumber) {
+        return response
+          .status(400)
+          .json({ message: "O telefone é obrigatório" });
       }
 
-      // Criptografando a senha
-      const cryptedPassword = bcrypt.hashSync(body.password, 8);
+      try {
+        const emailExist = await userSchema.findOne({ email: body.email });
+        if (emailExist) {
+          return response
+            .status(400)
+            .json({ message: "Esse email já está em uso" });
+        }
 
-      // Criando o usuário no banco de dados e armazenando na variável user
-      const user = await userSchema.create({
-        name: body.name,
-        email: body.email,
-        password: cryptedPassword,
-        adress: body.adress,
-        phoneNumber: body.phoneNumber,
-      });
+        const cryptedPassword = bcrypt.hashSync(body.password, 8);
 
-      // Gerando o token JWT
-      const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: '1h' });
+        const user = await userSchema.create({
+          name: body.name,
+          email: body.email,
+          password: cryptedPassword,
+          adress: body.adress,
+          phoneNumber: body.phoneNumber,
+        });
 
-      // Retornando a resposta com o token
-      return response.status(201).json({
-        message: "Seu usuário foi criado",
-        token: token,  // O token gerado
-        name: user.name,  // Usando user.name aqui
-      });
-    } catch (error) {
-      return response.status(500).json({
-        message: "Erro ao cadastrar usuário",
-        error: error.message || "Erro desconhecido",
-      });
-    }
-  });
+        const token = jwt.sign({ userId: user._id }, SECRET_KEY, {
+          expiresIn: "1h",
+        });
 
-  app.delete("/deleteUser/:id", async (request, response) => {
-    const id = request.params.id;  // Pegando o ID do usuário da URL
-
-    try {
-      // Verificando se o usuário existe
-      const user = await userSchema.findById(id);
-      if (!user) {
-        return response.status(404).json({ message: "Usuário não encontrado!" });
+        return response.status(201).json({
+          message: "Seu usuário foi criado",
+          token: token,
+          name: user.name,
+        });
+      } catch (error) {
+        return response.status(500).json({
+          message: "Erro ao cadastrar usuário",
+          error: error.message || "Erro desconhecido",
+        });
       }
+    });
 
-      // Deletando o usuário
-      await userSchema.findByIdAndDelete(id);
+    app.delete("/deleteUser/:id", async (request, response) => {
+      const id = request.params.id;
 
-      return response.status(200).json({ message: "Usuário deletado com sucesso!" });
-    } catch (error) {
-      return response.status(500).json({
-        message: "Erro ao tentar deletar o usuário",
-        error: error.message,
-      });
-    }
-  });
+      try {
+        const user = await userSchema.findById(id);
+        if (!user) {
+          return response
+            .status(404)
+            .json({ message: "Usuário não encontrado!" });
+        }
 
+        await userSchema.findByIdAndDelete(id);
+
+        return response
+          .status(200)
+          .json({ message: "Usuário deletado com sucesso!" });
+      } catch (error) {
+        return response.status(500).json({
+          message: "Erro ao tentar deletar o usuário",
+          error: error.message,
+        });
+      }
+    });
 
     app.post("/login", async (request, response) => {
       const body = request.body;
@@ -123,7 +126,9 @@ const startApp = async () => {
         const userExists = await userSchema.findOne({ email: body.email });
 
         if (!userExists) {
-          return response.status(404).json({ message: "E-mail não encontrado" });
+          return response
+            .status(404)
+            .json({ message: "E-mail não encontrado" });
         }
 
         const isCorrectPassword = bcrypt.compareSync(
@@ -153,78 +158,90 @@ const startApp = async () => {
     });
 
     app.get("/getAllUsers", async (request, response) => {
-  try {
-    const userExists = await userSchema.find();
+      try {
+        const userExists = await userSchema.find();
 
-    if (!userExists || userExists.length === 0) {
-      return response
-        .status(400)
-        .json({ message: "Nenhum usuário encontrado!" });
-    }
+        if (!userExists || userExists.length === 0) {
+          return response
+            .status(400)
+            .json({ message: "Nenhum usuário encontrado!" });
+        }
 
-    return response.json(userExists);
-  } catch (error) {
-    return response.status(500).json({
-      message: "Erro interno:",
-      error: error.message || "Erro desconhecido",
+        return response.json(userExists);
+      } catch (error) {
+        return response.status(500).json({
+          message: "Erro interno:",
+          error: error.message || "Erro desconhecido",
+        });
+      }
     });
-  }
-});
-
 
     app.post("/product", async (request, response) => {
-  const body = request.body;
+      const body = request.body;
 
-  if (!body.name || !body.description || !body.price || !body.url || !body.manufacturer || !body.idOwner) {
-    return response.status(400).json({ message: "Campos obrigatórios estão faltando!" });
-  }
+      if (
+        !body.name ||
+        !body.description ||
+        !body.price ||
+        !body.url ||
+        !body.manufacturer ||
+        !body.idOwner
+      ) {
+        return response
+          .status(400)
+          .json({ message: "Campos obrigatórios estão faltando!" });
+      }
 
-  try {
-    const isValidId = validarId(body.idOwner);  // Validando se o idOwner é válido
-    if (!isValidId) {
-      return response.status(400).json({ message: "Id do usuário inválido." });
-    }
+      try {
+        const isValidId = validarId(body.idOwner);
+        if (!isValidId) {
+          return response
+            .status(400)
+            .json({ message: "Id do usuário inválido." });
+        }
 
-    const product = await ProductSchema.create({
-      name: body.name,
-      description: body.description,
-      price: body.price,
-      url: body.url,
-      manufacturer: body.manufacturer,
-      idOwner: body.idOwner  // Certifique-se de incluir o idOwner aqui
+        const product = await ProductSchema.create({
+          name: body.name,
+          description: body.description,
+          price: body.price,
+          url: body.url,
+          manufacturer: body.manufacturer,
+          idOwner: body.idOwner,
+        });
+
+        return response.status(201).json({
+          message: "Produto criado com sucesso!",
+          product,
+        });
+      } catch (error) {
+        return response.status(500).json({
+          message: "Erro ao criar o produto",
+          error: error.message,
+        });
+      }
     });
-
-    return response.status(201).json({
-      message: "Produto criado com sucesso!",
-      product
-    });
-  } catch (error) {
-    return response.status(500).json({
-      message: "Erro ao criar o produto",
-      error: error.message,
-    });
-  }
-});
 
     app.get("/getproducts", async (request, response) => {
-  try {
-    const products = await ProductSchema.find().populate('idOwner', 'name email'); // Popula apenas os campos desejados
+      try {
+        const products = await ProductSchema.find().populate(
+          "idOwner",
+          "name email"
+        );
 
-    if (!products || products.length === 0) {
-      return response
-        .status(400)
-        .json({ message: "Nenhum produto encontrado!" });
-    }
+        if (!products || products.length === 0) {
+          return response
+            .status(400)
+            .json({ message: "Nenhum produto encontrado!" });
+        }
 
-    return response.json(products);
-  } catch (error) {
-    return response.status(500).json({
-      message: "Erro interno:",
-      error: error,
+        return response.json(products);
+      } catch (error) {
+        return response.status(500).json({
+          message: "Erro interno:",
+          error: error,
+        });
+      }
     });
-  }
-});
-
 
     app.get("/getproductsbyid/:id", async (request, response) => {
       const id = request.params.id;
@@ -253,7 +270,9 @@ const startApp = async () => {
       }
       try {
         await ProductSchema.deleteOne({ _id: id });
-        return response.status(204).json({ message: "Seu produto foi excluído!" });
+        return response
+          .status(204)
+          .json({ message: "Seu produto foi excluído!" });
       } catch (error) {
         return response.status(500).json({
           message: "Erro interno:",
@@ -267,7 +286,6 @@ const startApp = async () => {
       const body = request.body;
 
       try {
-
         await ProductSchema.findByIdAndUpdate(id, {
           name: body.name,
           description: body.description,
@@ -276,7 +294,9 @@ const startApp = async () => {
           manufacturer: body.manufacturer,
         });
 
-        return response.status(200).json({ message: "Seu produto foi editado!" });
+        return response
+          .status(200)
+          .json({ message: "Seu produto foi editado!" });
       } catch (error) {
         return response.status(500).json({
           message: "Erro interno:",
@@ -286,63 +306,64 @@ const startApp = async () => {
     });
 
     app.post("/createRent/:idUser/:idProduct", async (request, response) => {
-  const body = request.body;
-  const idUser = request.params.idUser;
-  const idProduct = request.params.idProduct;
+      const body = request.body;
+      const idUser = request.params.idUser;
+      const idProduct = request.params.idProduct;
 
-  // Verificar se o tempo de aluguel foi fornecido
-  if (!body.duration) {
-    return response.status(400).json({ message: "O tempo de aluguel é obrigatório" });
-  }
+      if (!body.duration) {
+        return response
+          .status(400)
+          .json({ message: "O tempo de aluguel é obrigatório" });
+      }
 
-  // Validar se os IDs são válidos
-  if (!validarId(idUser)) {
-    return response.status(404).json({ message: "Id do usuário não é válido!" });
-  }
-  if (!validarId(idProduct)) {
-    return response.status(404).json({ message: "Id do produto não é válido!" });
-  }
+      if (!validarId(idUser)) {
+        return response
+          .status(404)
+          .json({ message: "Id do usuário não é válido!" });
+      }
+      if (!validarId(idProduct)) {
+        return response
+          .status(404)
+          .json({ message: "Id do produto não é válido!" });
+      }
 
-  try {
-    // Verificar se o produto existe
-    const produto = await ProductSchema.findById(idProduct);
+      try {
+        const produto = await ProductSchema.findById(idProduct);
 
-    if (!produto) {
-      return response.status(404).json({ message: "Produto não encontrado!" });
-    }
+        if (!produto) {
+          return response
+            .status(404)
+            .json({ message: "Produto não encontrado!" });
+        }
 
-    // Criar o aluguel no banco de dados
-    await rentSchema.create({
-      duration: body.duration,
-      price: body.price,  // O preço pode vir do body ou ser calculado
-      idUser: idUser,
-      idProduct: idProduct,
-      idOwner: produto.idOwner,  // Referência ao proprietário do produto
-      startDate: body.startDate,  // Data de início do aluguel
+        await rentSchema.create({
+          duration: body.duration,
+          price: body.price,
+          idUser: idUser,
+          idProduct: idProduct,
+          idOwner: produto.idOwner,
+          startDate: body.startDate,
+        });
+
+        return response
+          .status(200)
+          .json({ message: "O aluguel foi agendado com sucesso" });
+      } catch (error) {
+        return response.status(500).json({
+          message: "Erro interno:",
+          error: error,
+        });
+      }
     });
-
-    // Resposta de sucesso
-    return response.status(200).json({ message: "O aluguel foi agendado com sucesso" });
-  } catch (error) {
-    return response.status(500).json({
-      message: "Erro interno:",
-      error: error,
-    });
-  }
-});
-
-
   } else {
-    console.log('🔴 Aplicação encerrada por erro de conexão.');
-    process.exit(1); 
+    console.log("🔴 Aplicação encerrada por erro de conexão.");
+    process.exit(1);
   }
 };
 
 startApp();
 
 function validarId(id) {
-    var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
-    return checkForHexRegExp.test(id);  // Retorna o resultado da validação
+  var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
+  return checkForHexRegExp.test(id);
 }
-
-    
