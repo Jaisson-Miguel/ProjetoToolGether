@@ -7,6 +7,8 @@ import ProductSchema from "./Schemas/Product.js";
 import rentSchema from "./Schemas/Rent.js";
 import conn from "./db/conn.js";
 
+import { listarProdutos } from "./controllers/ProductController.js";
+
 import jwtVerify from "./services/jwt-verify.js";
 
 import jwt from "jsonwebtoken";
@@ -221,27 +223,7 @@ const startApp = async () => {
       }
     });
 
-    app.get("/getproducts", async (request, response) => {
-      try {
-        const products = await ProductSchema.find().populate(
-          "idOwner",
-          "name email"
-        );
-
-        if (!products || products.length === 0) {
-          return response
-            .status(400)
-            .json({ message: "Nenhum produto encontrado!" });
-        }
-
-        return response.json(products);
-      } catch (error) {
-        return response.status(500).json({
-          message: "Erro interno:",
-          error: error,
-        });
-      }
-    });
+    app.get("/getproducts", listarProdutos);
 
     app.get("/getproductsbyid/:id", async (request, response) => {
       const id = request.params.id;
@@ -250,7 +232,7 @@ const startApp = async () => {
 
         if (!products) {
           return response
-            .status(400)
+            .status(404)
             .json({ message: "Nenhum produto encontrado!" });
         }
 
