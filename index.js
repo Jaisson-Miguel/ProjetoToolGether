@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";

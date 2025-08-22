@@ -1,6 +1,11 @@
-import User from "../Schemas/User.js";
+import userSchema from "../Schemas/User.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 export async function Register(request, response) {
+  console.log("Dados recebidos do front:", request.body);
+
   const body = request.body;
 
   if (!body.email) {
@@ -47,6 +52,7 @@ export async function Register(request, response) {
       name: user.name,
     });
   } catch (error) {
+    console.log("Erro ao criar usuário:", error);
     return response.status(500).json({
       message: "Erro ao cadastrar usuário",
       error: error.message || "Erro desconhecido",
