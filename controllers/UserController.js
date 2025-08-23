@@ -2,6 +2,7 @@ import userSchema from "../Schemas/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
+const SECRET_KEY = process.env.SECRET_KEY;
 
 export async function Register(request, response) {
   console.log("Dados recebidos do front:", request.body);
@@ -83,6 +84,7 @@ export async function deleteUser(request, response) {
 }
 
 export async function Login(request, response) {
+  console.log("Dados recebidos do front:", request.body);
   const body = request.body;
   console.log(body.email);
   try {
