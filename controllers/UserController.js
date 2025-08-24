@@ -115,7 +115,7 @@ export async function Login(request, response) {
     );
 
     return response.status(200).json({
-      usuario: userExists.name,
+      user: userExists.name,
       email: userExists.email,
       token: USER_TOKEN,
     });
