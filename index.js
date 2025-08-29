@@ -45,7 +45,7 @@ const startApp = async () => {
     );
 
     app.get("/", (request, response) => {
-      return response.json({ message: "Servidor funcionando! 222" });
+      return response.json({ message: "Servidor funcionando!" });
     });
 
     app.post("/register", Register);
